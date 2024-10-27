@@ -14,19 +14,24 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                script {
-                    if (isUnix()) {
-                        sh 'echo "Building project on Unix..."'
-                        // Place Unix-specific build commands here (e.g., sh './build.sh')
-                    } else {
-                        bat 'echo Building project on Windows...'
-                        // Place Windows-specific build commands here (e.g., bat 'build.bat')
-                    }
-                }
+       stage('Build') {
+    steps {
+        script {
+            if (isUnix()) {
+                sh '''
+                    echo "Building project on Unix..."
+                    set -e
+                    javac -d out src/**/*.java
+                '''
+            } else {
+                bat '''
+                    echo Building project on Windows...
+                    javac -d out src/**/*.java
+                '''
             }
         }
+    }
+}
 
         stage('Test') {
             steps {
