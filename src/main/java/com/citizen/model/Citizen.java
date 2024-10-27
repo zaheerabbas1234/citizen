@@ -7,7 +7,7 @@ import jakarta.persistence.Id;
 public class Citizen {
 	
 	@Id
-	private String citizenId;
+	private String citizenId
 	private String citizenName;
 	private String vaccinationCenterId;
 	private String vaccinationCenterAddress;
