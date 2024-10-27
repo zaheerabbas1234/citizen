@@ -2,25 +2,41 @@ pipeline {
     agent any
 
     stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/zaheerabbas1234/citizen.git'
+            }
+        }
+
         stage('Build') {
             steps {
-                echo 'Building...'
-                bat 'javac -d out src/**/*.java'  // Adjust the build command as needed
+                sh './mvnw clean package'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Running tests...'
-                bat 'java -cp out org.junit.runner.JUnitCore <TestClassName>' // Replace <TestClassName> with the actual test class
+                sh './mvnw test'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying...'
-                bat 'xcopy /E /I out \\path\\to\\deployment\\directory' // Replace with your deployment path
+                echo 'Deploying the application...'
+                // Add custom deployment steps here
             }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'target/*.jar', allowEmptyArchive: true
+        }
+        success {
+            echo 'Pipeline completed successfully.'
+        }
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }
