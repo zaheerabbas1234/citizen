@@ -4,7 +4,7 @@ pipeline {
     environment {
         GIT_URL = 'https://github.com/zaheerabbas1234/citizen.git'
     }
-    
+
     tools {
         maven 'Maven' // Ensure Maven is available in Jenkins and configured under Global Tool Configuration
     }
@@ -13,8 +13,8 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    checkout([$class: 'GitSCM', branches: [[name: '*/master']], 
-                    userRemoteConfigs: [[url: env.GIT_URL]]])
+                    // Checkout the code from the specified Git repository
+                    checkout([$class: 'GitSCM', branches: [[name: '*/master']], userRemoteConfigs: [[url: env.GIT_URL]]])
                 }
             }
         }
@@ -22,12 +22,12 @@ pipeline {
         stage('Build') {
             steps {
                 script {
+                    echo 'Building the project...'
+                    // Use Maven wrapper to build the project
                     if (isUnix()) {
                         sh './mvnw clean package'
-                        sh 'echo "Building project on Unix..."'
                     } else {
                         bat './mvnw.cmd clean package'
-                        bat 'echo Building project on Windows...'
                     }
                 }
             }
@@ -36,12 +36,12 @@ pipeline {
         stage('Test') {
             steps {
                 script {
+                    echo 'Running tests...'
+                    // Use Maven wrapper to run tests
                     if (isUnix()) {
                         sh './mvnw test'
-                        sh 'echo "Running tests on Unix..."'
                     } else {
                         bat './mvnw.cmd test'
-                        bat 'echo Running tests on Windows...'
                     }
                 }
             }
@@ -51,12 +51,13 @@ pipeline {
             steps {
                 echo 'Deploying the application...'
                 script {
+                    // Add your deployment steps here (e.g., copy to server, deploy to cloud, etc.)
                     if (isUnix()) {
                         sh 'echo "Deploying project on Unix..."'
-                        // Add Unix deployment commands if needed
+                        // Place Unix-specific deployment commands here if needed
                     } else {
                         bat 'echo Deploying project on Windows...'
-                        // Add Windows deployment commands if needed
+                        // Place Windows-specific deployment commands here if needed
                     }
                 }
             }
@@ -65,6 +66,7 @@ pipeline {
 
     post {
         always {
+            // Archive the JAR file produced by the build
             archiveArtifacts artifacts: 'target/*.jar', allowEmptyArchive: true
             echo 'Archiving artifacts...'
         }
@@ -73,6 +75,7 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed.'
+            // Archive any log files in case of failure
             archiveArtifacts artifacts: '**/target/*.log', allowEmptyArchive: true
         }
     }
