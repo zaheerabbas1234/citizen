@@ -4,16 +4,11 @@ pipeline {
     environment {
         GIT_URL = 'https://github.com/zaheerabbas1234/citizen.git'
     }
-
-    tools {
-        maven 'Maven' // Ensure Maven is available in Jenkins and configured under Global Tool Configuration
-    }
-
     stages {
         stage('Checkout') {
             steps {
+                git 'https://github.com/zaheerabbas1234/citizen.git'
                 script {
-                    // Checkout the code from the specified Git repository
                     checkout([$class: 'GitSCM', branches: [[name: '*/master']], userRemoteConfigs: [[url: env.GIT_URL]]])
                 }
             }
@@ -21,13 +16,14 @@ pipeline {
 
         stage('Build') {
             steps {
+                sh './mvnw clean package'
                 script {
-                    echo 'Building the project...'
-                    // Use Maven wrapper to build the project
                     if (isUnix()) {
-                        sh './mvnw clean package'
+                        sh 'echo "Building project on Unix..."'
+                        // Place Unix-specific build commands here (e.g., sh './build.sh')
                     } else {
-                        bat './mvnw.cmd clean package'
+                        bat 'echo Building project on Windows...'
+                        // Place Windows-specific build commands here (e.g., bat 'build.bat')
                     }
                 }
             }
@@ -35,13 +31,14 @@ pipeline {
 
         stage('Test') {
             steps {
+                sh './mvnw test'
                 script {
-                    echo 'Running tests...'
-                    // Use Maven wrapper to run tests
                     if (isUnix()) {
-                        sh './mvnw test'
+                        sh 'echo "Running tests on Unix..."'
+                        // Place Unix-specific test commands here (e.g., sh './test.sh')
                     } else {
-                        bat './mvnw.cmd test'
+                        bat 'echo Running tests on Windows...'
+                        // Place Windows-specific test commands here (e.g., bat 'test.bat')
                     }
                 }
             }
@@ -50,14 +47,14 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying the application...'
+                // Add custom deployment steps here
                 script {
-                    // Add your deployment steps here (e.g., copy to server, deploy to cloud, etc.)
                     if (isUnix()) {
                         sh 'echo "Deploying project on Unix..."'
-                        // Place Unix-specific deployment commands here if needed
+                        // Place Unix-specific deployment commands here
                     } else {
                         bat 'echo Deploying project on Windows...'
-                        // Place Windows-specific deployment commands here if needed
+                        // Place Windows-specific deployment commands here
                     }
                 }
             }
@@ -66,16 +63,13 @@ pipeline {
 
     post {
         always {
-            // Archive the JAR file produced by the build
             archiveArtifacts artifacts: 'target/*.jar', allowEmptyArchive: true
-            echo 'Archiving artifacts...'
         }
         success {
             echo 'Pipeline completed successfully.'
         }
         failure {
             echo 'Pipeline failed.'
-            // Archive any log files in case of failure
             archiveArtifacts artifacts: '**/target/*.log', allowEmptyArchive: true
         }
     }
